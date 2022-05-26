@@ -151,7 +151,6 @@ const moveAllToBZX = (moveElement, e, id) => {
 }
 const moveAllToB = async () => {
     let element = [];
-    let moveAllToBNum =0
     const moveArr = document.querySelectorAll("._queue-w7gpby-2 ._action-kmtnpx-1.bPyphi")
     for (let index = 0; index < moveArr.length; index++) {
         let lock = moveArr[index].parentNode.querySelectorAll("._lock-kmtnpx-5")
@@ -166,8 +165,9 @@ const moveAllToB = async () => {
         const result = await moveAllToBZX(lastElement, e, id)
         console.log(result)
     }
-    let timeEnd = null
+    /*let timeEnd = null
     let timeEndOut = null
+    let moveAllToBNum =0
     globalNum++;
     timeEnd = setInterval(() => {
         if (document.querySelectorAll(".ctaxMU").length < 1) {
@@ -189,7 +189,7 @@ const moveAllToB = async () => {
                 location.reload();
             }
         }
-    }, 1000)
+    }, 1000)*/
 }
 
 // 2.查询法师中哪些是Craft 4.按顺序执行所有可Craft的法师 基本完成
@@ -303,7 +303,32 @@ const Map = async () => {
         const result = await mapZX(lastElement, e, id)
         console.log(result)
     }
-    moveAllToB();
+    // moveAllToB();
+    let timeEnd = null
+    let timeEndOut = null
+    let moveAllToBNum =0
+    globalNum++;
+    timeEnd = setInterval(() => {
+        if (document.querySelectorAll(".ctaxMU").length < 1) {
+            clearInterval(timeEnd)
+            clearTimeout(timeEndOut)
+            timeEndOut = setTimeout(function () {
+                log(`开始进入第${globalNum}轮...`)
+                if (globalNum > 5) {
+                    location.reload();
+                } else {
+                    $('#trustClaim').click()
+                }
+
+            }, 3000)
+        } else {
+            log("等待执行完毕后进入下一轮...")
+            moveAllToBNum++;
+            if (moveAllToBNum > 50) {
+                location.reload();
+            }
+        }
+    }, 1000)
 
 }
 (function () {
