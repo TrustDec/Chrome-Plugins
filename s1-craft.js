@@ -7,11 +7,13 @@
 // @match       https://play.laddercaster.com/
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js
 // ==/UserScript==
+// 顺序:claim->craft->move->craft
+
 'use strict';
 function log(str) {
     console.log("%c[*lada*] " + str + ":", "color: green;font-size:15px");
 }
-var claimtime = null;
+
 // 1.查询是否需要Claim 基本完成
 function claim() {
     var buttons = document.querySelectorAll("._claim-kmtnpx-8");
@@ -21,8 +23,8 @@ function claim() {
             buttons[index].click();
         }
     } else {
-        clearInterval(claimtime)
         log("没有claim执行")
+        // Map()
     }
 }
 
@@ -36,8 +38,8 @@ const craftZX = (craftElement) => {
         console.log(craftElement)
         // 循环执行,直到元素渲染完毕
         yczx = setInterval(() => {
-            const items = document.querySelectorAll(".hhXoph")
-            if(items.length){
+            const items = document.querySelectorAll("._item-sc-19b2yt2-0")
+            if (items.length) {
                 clearInterval(yczx)
                 console.log(items)
                 if (items.length >= 3) {
@@ -46,11 +48,12 @@ const craftZX = (craftElement) => {
                     items[2].click()
                     document.querySelectorAll(".kXERXs")[0].click()
                     time = setInterval(() => {
-                        if(document.querySelectorAll(".ctaxMU").length<1){
+                        if (document.querySelectorAll(".ctaxMU").length < 1) {
                             log("执行Craft完毕,开始下一个")
                             clearInterval(time)
-                            resolve(true)
-                        }else{
+                            location.reload();
+                            // resolve(true)
+                        } else {
                             log("正在执行Craft")
                         }
 
@@ -61,11 +64,11 @@ const craftZX = (craftElement) => {
                     // resolve(false)
                     // craftZX(craftElement)
                 }
-            }else{
+            } else {
                 log("正在等待数据..")
             }
 
-        },2000)
+        }, 2000)
 
 
 
@@ -79,25 +82,30 @@ const craftZX = (craftElement) => {
 const craftCX = async () => {
     // 切换到法师
     document.querySelectorAll("._item-k86mvz-1")[3].click()
-    Crafts=[]
-    const Craftsarray = document.querySelectorAll(".cCcBhM")
-    if (Craftsarray.length) {
-        for (let index = 0; index < Craftsarray.length; index++) {
-            let lock = Craftsarray[index].parentNode.querySelectorAll("._lock-kmtnpx-5")
-            if (Craftsarray[index].innerText === "Craft" && lock.length < 1) {
-                Crafts.push(Craftsarray[index])
+    Crafts = []
+    // craft装备类型,
+    const Craftsarray = document.querySelectorAll(".cCcBhM") || []
+    //  craft宝箱类型,
+    const CraftsBoxarray = document.querySelectorAll(".gdnuZM") || []
+    const newCaftBoxArr = [...Craftsarray, ...CraftsBoxarray]
+    if (newCaftBoxArr.length) {
+        for (let index = 0; index < newCaftBoxArr.length; index++) {
+            let lock = newCaftBoxArr[index].parentNode.querySelectorAll("._lock-kmtnpx-5")
+            if (newCaftBoxArr[index].innerText === "Craft" && lock.length < 1) {
+                Crafts.push(newCaftBoxArr[index])
             }
         }
-
+        log(Crafts)
         if (Crafts.length) {
             log(Crafts.length + "个符合Craft")
             const result = await craftZX(Crafts[0])
             result && craftCX() || Chest()
         } else {
             log("没有符合的Craft")
+            Map()
         }
 
-    }else{
+    } else {
         log("没有加载完毕")
     }
 
@@ -114,39 +122,71 @@ function Chest() {
 }
 var cxmap = null
 // 3.查询地图7层是否有craft的格子,如果有,则移动不在craft的法师
-function Map() {
+var mapZXtime = null
+const mapZX = (craftElement, text, id) => {
+    return new Promise((resolve, reject) => {
+        craftElement.click();
+        // 点击之后查询当前在哪个格子,查询Craft格子在哪里
+        //
+        log(`id:${id} ${text} 开始检测...`)
+        setTimeout(function () {
+            let isState = false
+            const movesElement = document.querySelectorAll("._row-sc-1xdwm08-2.gQEDwo")[1].querySelector("._tiles-sc-1zb5eq-0.jxlyiU").childNodes;
+            for (let index = 0; index < movesElement.length; index++) {
+                const defaultCraft = movesElement[index]
+                const ycz = defaultCraft.querySelector("._icon-hzg9if-7.kPSOpj") || defaultCraft.querySelector("._icon-hzg9if-7.hbGAsg")
+                if (ycz) {
+                    isState = true
+                    const textIndex = ["A", "B", "C"][index]
 
-    // 切换到地图
-    document.querySelectorAll("._item-k86mvz-1")[4].click()
-    // 查找第7层是否存在craft格子
-    cxmap = setInterval(() => {
-        const maps= document.querySelectorAll("._row-sc-196rxlk-8.dMprSq")
-        if(maps.length){
-            clearInterval(cxmap)
-            const craftState = document.querySelectorAll("._row-sc-196rxlk-8.dMprSq")[22].childNodes;
-            let elementIndex = -1;
-            for (let index = 0; index < craftState.length; index++) {
-                const findIndex= document.querySelectorAll("._row-sc-196rxlk-8.dMprSq")[22].childNodes[0].querySelector(".kPSOpj")
-                const findIndex= document.querySelectorAll("._row-sc-196rxlk-8.dMprSq")[22].childNodes[0].querySelector(".hbGAsg")
-                if(findIndex){
-                    elementIndex = index
-
+                    if (text.indexOf(textIndex) > -1) {
+                        log("当前法师已经在Craft格子 for")
+                        resolve(true)
+                    } else {
+                        log(`${id}存在Craft格子,${text}准备迁移到${textIndex}`)
+                        ycz.parentNode.parentNode.click()
+                        if (document.querySelector("._button-t7f8y3-3.gHfmBw")) {
+                            log("正在Move")
+                            document.querySelector("._button-t7f8y3-3.gHfmBw").click()
+                            resolve(true)
+                        } else {
+                            log("距离太远 无法Move")
+                            document.querySelectorAll("._fade-c43pys-3")[0].click()
+                            resolve(false)
+                        }
+                    }
+                } else {
+                    log("此格子不是Craft")
                 }
             }
-            if(elementIndex>-1){
-                log(`${findIndex}${["A","B","C"][elementIndex]}${elementIndex+1}是Craft格子`)
-            }else{
-                log("没有craft格子)")
+            if (!isState) {
+                log("当前法师不存在可Craft的格子")
+                document.querySelectorAll("._fade-c43pys-3")[0].click()
+                resolve(false)
             }
-        }else{
-            log("正在准备数据(craft格子)")
+        }, 2000)
+    })
+}
+const Map = async () => {
+    const element = document.querySelectorAll("._queue-w7gpby-2 ._action-kmtnpx-1.bPyphi")
+
+    let elementArr = []
+    for (let index = 0; index < element.length; index++) {
+        let lock = element[index].parentNode.querySelectorAll("._lock-kmtnpx-5")
+        if (element[index].innerText === "Move" && lock.length < 1) {
+            elementArr.push(element[index])
         }
-    },1000)
-
-    // 如果存在,则查询所有不在B7并且是loot状态的法师的法师
-    // 然后循环Move到B7
-    // 然后重新回到craftCX
-
+    }
+    console.log(elementArr)
+    for (let index = 0; index < elementArr.length; index++) {
+        const e = document.querySelectorAll("._queue-w7gpby-2 ._queue-kmtnpx-0.kQjnwr")[index].childNodes[0].childNodes[2].innerText
+        const id = document.querySelectorAll("._overlay-k0m5r7-1.fIMthV")[index].innerText.split("\n")[1]
+        const lastElement = elementArr[index]
+        console.log(lastElement)
+        const result = await mapZX(lastElement, e, id)
+        console.log(result)
+    }
+  
 }
 (function () {
     const startTyple = `height:50px;position:fixed;bottom:5%;left:10%;z-index:1000;display:flex;`;
@@ -163,13 +203,20 @@ function Map() {
         claim()
     })
     $('#trustCraftCX').bind('click', function () {
-        Crafts=[]
+        Crafts = []
         craftCX()
     })
     $('#trustMap').bind('click', function () {
         Map()
     })
-
-
+    // 进来之后执行 Craft
+    // craftCX()
+    const box = null
+    box = setInterval(function(){
+        if(document.querySelectorAll("._item-w7gpby-0").length>0){
+            clearInterval(box)
+            claim()
+        }
+    },1000)
 })()
 
