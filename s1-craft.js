@@ -7,7 +7,7 @@
 // @match       https://play.laddercaster.com/
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js
 // ==/UserScript==
-// 顺序:claim->craft->move->craft->loot
+// 顺序:claim->craft->move->craft->把处于A、C位置的move到 B
 'use strict';
 function log(str) {
     console.log("%c[*lada*] " + str, "color: green;font-size:15px");
@@ -96,7 +96,7 @@ const craftZX = (craftElement) => {
                         } else {
                             log("正在执行Craft")
                             CraftNum++;
-                            if (CraftNum > 10) {
+                            if (CraftNum > 30) {
                                 location.reload();
                             }
                         }
@@ -113,6 +113,78 @@ const craftZX = (craftElement) => {
         }, 2000)
     })
 
+}
+// 将处于A、C位置的move到 B
+const moveAllToBZX = (moveElement, e, id) => {
+    let CraftNum = 0;
+    let time = null;
+    let yczx = null;
+    return new Promise((resolve, reject) => {
+        moveElement.click();
+        if (e.indexOf("A") > -1 || e.indexOf("C") > -1) {
+            yczx = setInterval(() => {
+                let movesElement = document.querySelectorAll("._row-sc-1xdwm08-2.gQEDwo")[1].querySelector("._tiles-sc-1zb5eq-0.jxlyiU").childNodes;
+                if (movesElement.length > 0) {
+                    clearInterval(yczx)
+                    movesElement[1].childNodes[0].childNodes[1].click()
+                    if (document.querySelector("._button-t7f8y3-3.gHfmBw")) {
+                        log("正在Move")
+                        document.querySelector("._button-t7f8y3-3.gHfmBw").click()
+                        resolve(true)
+                    } else {
+                        log("距离太远 无法Move")
+                        document.querySelectorAll("._fade-c43pys-3")[0].click()
+                        resolve(false)
+                    }
+                } else {
+                    log("等待格子数据加载...")
+                }
+            }, 2000)
+        } else {
+            log("此法师正在B位,无需移动...")
+            document.querySelectorAll("._fade-c43pys-3")[0].click()
+            resolve(true)
+        }
+
+    })
+
+}
+const moveAllToB = async () => {
+    let element = [];
+    const moveArr = document.querySelectorAll("._queue-w7gpby-2 ._action-kmtnpx-1.bPyphi")
+    for (let index = 0; index < moveArr.length; index++) {
+        let lock = moveArr[index].parentNode.querySelectorAll("._lock-kmtnpx-5")
+        if (moveArr[index].innerText === "Move" && lock.length < 1) {
+            element.push(moveArr[index])
+        }
+    }
+    for (let index = 0; index < element.length; index++) {
+        const e = element[index].parentNode.parentNode.childNodes[0].childNodes[2].innerText
+        const id = element[index].parentNode.parentNode.parentNode.parentNode.childNodes[0].innerText.split("\n")[1]
+        const lastElement = element[index]
+        const result = await moveAllToBZX(lastElement, e, id)
+        console.log(result)
+    }
+    let timeEnd = null
+    let timeEndOut = null
+    globalNum++;
+    timeEnd = setInterval(() => {
+        if (document.querySelectorAll(".ctaxMU").length < 1) {
+            clearInterval(timeEnd)
+            clearTimeout(timeEndOut)
+            timeEndOut = setTimeout(function () {
+                log(`开始进入第${globalNum}轮...`)
+                if (globalNum > 5) {
+                    location.reload();
+                } else {
+                    $('#trustClaim').click()
+                }
+
+            }, 3000)
+        } else {
+            log("等待执行完毕后进入下一轮...")
+        }
+    }, 3000)
 }
 
 // 2.查询法师中哪些是Craft 4.按顺序执行所有可Craft的法师 基本完成
@@ -226,26 +298,8 @@ const Map = async () => {
         const result = await mapZX(lastElement, e, id)
         console.log(result)
     }
-    let timeEnd = null
-    let timeEndOut = null
-    globalNum++;
-    timeEnd = setInterval(() => {
-        if (document.querySelectorAll(".ctaxMU").length < 1) {
-            clearInterval(timeEnd)
-            clearTimeout(timeEndOut)
-            timeEndOut = setTimeout(function () {
-                log(`开始进入第${globalNum}轮...`)
-                if (globalNum > 5) {
-                    location.reload();
-                } else {
-                    $('#trustClaim').click()
-                }
+    moveAllToB();
 
-            }, 5000)
-        } else {
-            log("等待执行完毕后进入下一轮...")
-        }
-    }, 5000)
 }
 (function () {
     const startTyple = `height:35px;position:fixed;bottom:10%;left:50%;margin-left:-160px;z-index:1000;display:flex;border-radius:5px;overflow:hidden;`;
