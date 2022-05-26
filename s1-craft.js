@@ -70,7 +70,7 @@ function lootsFn() {
             element[index].click();
         }
     }
-   
+
 }
 
 var time = null;
@@ -170,46 +170,52 @@ const mapZX = (craftElement, text, id) => {
         // 点击之后查询当前在哪个格子,查询Craft格子在哪里
         //
         log(`id:${id} ${text} 开始检测...`)
-        setTimeout(function () {
+        let mapTime = null
+        mapTime = setInterval(function () {
             let isState = false
             const movesElement = document.querySelectorAll("._row-sc-1xdwm08-2.gQEDwo")[1].querySelector("._tiles-sc-1zb5eq-0.jxlyiU").childNodes;
-            for (let index = 0; index < movesElement.length; index++) {
-                const defaultCraft = movesElement[index]
-                const ycz = defaultCraft.querySelector("._icon-hzg9if-7.kPSOpj") || defaultCraft.querySelector("._icon-hzg9if-7.hbGAsg")
-                console.log(ycz)
-                if (ycz) {
-                    isState = true
-                    const textIndex = ["A", "B", "C"][index]
+            if (movesElement.length > 0) {
+                clearInterval(mapTime)
+                for (let index = 0; index < movesElement.length; index++) {
+                    const defaultCraft = movesElement[index]
+                    const ycz = defaultCraft.querySelector("._icon-hzg9if-7.kPSOpj") || defaultCraft.querySelector("._icon-hzg9if-7.hbGAsg")
+                    if (ycz) {
+                        isState = true
+                        const textIndex = ["A", "B", "C"][index]
 
-                    if (text.indexOf(textIndex) > -1) {
-                        log("当前法师已经在Craft格子 for")
-                        resolve(true)
-                    } else {
-                        log(`${id}存在Craft格子,${text}准备迁移到${textIndex}`)
-                        ycz.parentNode.parentNode.click()
-                        if (document.querySelector("._button-t7f8y3-3.gHfmBw")) {
-                            log("正在Move")
-                            document.querySelector("._button-t7f8y3-3.gHfmBw").click()
+                        if (text.indexOf(textIndex) > -1) {
+                            log("当前法师已经在Craft格子 for")
                             resolve(true)
                         } else {
-                            log("距离太远 无法Move")
-                            document.querySelectorAll("._fade-c43pys-3")[0].click()
-                            resolve(false)
+                            log(`${id}存在Craft格子,${text}准备迁移到${textIndex}`)
+                            ycz.parentNode.parentNode.click()
+                            if (document.querySelector("._button-t7f8y3-3.gHfmBw")) {
+                                log("正在Move")
+                                document.querySelector("._button-t7f8y3-3.gHfmBw").click()
+                                resolve(true)
+                            } else {
+                                log("距离太远 无法Move")
+                                document.querySelectorAll("._fade-c43pys-3")[0].click()
+                                resolve(false)
+                            }
                         }
+                    } else {
+                        // log("此格子不是Craft")
                     }
-                } else {
-                    // log("此格子不是Craft")
                 }
-            }
-            if (!isState) {
-                log("当前法师不存在Craft的格子")
-                document.querySelectorAll("._fade-c43pys-3")[0].click()
-                resolve(false)
+                if (!isState) {
+                    log("当前法师不存在Craft的格子")
+                    document.querySelectorAll("._fade-c43pys-3")[0].click()
+                    resolve(false)
+                }
+            } else {
+                log("等待格子数据加载...")
             }
         }, 2000)
     })
 }
 const Map = async () => {
+    let MapNum =0
     const element = document.querySelectorAll("._queue-w7gpby-2 ._action-kmtnpx-1.bPyphi")
     let elementArr = []
     for (let index = 0; index < element.length; index++) {
@@ -218,6 +224,7 @@ const Map = async () => {
             elementArr.push(element[index])
         }
     }
+    console.log(elementArr)
     elementArr.length < 1 && log("没有Move可执行")
     for (let index = 0; index < elementArr.length; index++) {
         const e = document.querySelectorAll("._queue-w7gpby-2 ._queue-kmtnpx-0.kQjnwr")[index].childNodes[0].childNodes[2].innerText
@@ -239,6 +246,10 @@ const Map = async () => {
             }, 10000)
         } else {
             log("等待执行完毕后进入下一轮...")
+            MapNum++;
+            if (MapNum > 5) {
+                location.reload();
+            }
         }
     }, 10000)
     // lootsFn()
