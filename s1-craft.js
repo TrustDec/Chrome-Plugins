@@ -8,23 +8,20 @@
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js
 // ==/UserScript==
 // 顺序:claim->craft->move->craft->loot
-//
-
-
 'use strict';
 function log(str) {
     console.log("%c[*lada*] " + str, "color: green;font-size:15px");
 }
-
+var globalNum = 0 // 计算当前是第几轮
 // 1.查询是否需要Claim 基本完成
 function claim() {
-    var box = null
-    var boxtime = null
+    let box = null
+    let boxtime = null
     let claimNum = 0
     box = setInterval(function () {
         if (document.querySelectorAll("._item-w7gpby-0").length > 0) {
             clearInterval(box)
-            var buttons = document.querySelectorAll("._claim-kmtnpx-8");
+            let buttons = document.querySelectorAll("._claim-kmtnpx-8");
             if (buttons.length > 0) {
                 for (let index = 0; index < buttons.length; index++) {
                     buttons[index].click();
@@ -32,7 +29,7 @@ function claim() {
                 boxtime = setInterval(() => {
                     if (document.querySelectorAll(".ctaxMU").length < 1) {
                         clearInterval(boxtime)
-                        claim()
+                        $('#trustClaim').click()
                     } else {
                         log("正在执行" + buttons.length + "个claim")
                         claimNum++;
@@ -41,10 +38,10 @@ function claim() {
                         }
                     }
 
-                }, 2000);
+                }, 1000);
             } else {
                 log("没有claim执行")
-                craftCX()
+                $('#trustCraftCX').click()
             }
         }
     }, 1000)
@@ -73,11 +70,12 @@ function lootsFn() {
 
 }
 
-var time = null;
-var yczx = null;
+
 // 某个法师执行craft操作 6.自动选入3个装备,仍然惦记Craft 基本完成
 const craftZX = (craftElement) => {
     let CraftNum = 0;
+    let time = null;
+    let yczx = null;
     return new Promise((resolve, reject) => {
         craftElement.click();
         // 循环执行,直到元素渲染完毕
@@ -95,11 +93,10 @@ const craftZX = (craftElement) => {
                             log("执行Craft完毕,开始下一个")
                             clearInterval(time)
                             location.reload();
-                            // resolve(true)
                         } else {
                             log("正在执行Craft")
                             CraftNum++;
-                            if (CraftNum > 5) {
+                            if (CraftNum > 10) {
                                 location.reload();
                             }
                         }
@@ -108,8 +105,6 @@ const craftZX = (craftElement) => {
 
                 } else {
                     log("装备不够,需要开宝箱")
-                    // resolve(false)
-                    // craftZX(craftElement)
                 }
             } else {
                 log("正在等待数据..")
@@ -140,10 +135,10 @@ const craftCX = async () => {
         if (Crafts.length) {
             log(Crafts.length + "个符合Craft")
             const result = await craftZX(Crafts[0])
-            result && craftCX() || Chest()
+            result && $('#trustCraftCX').click() || Chest()
         } else {
             log("没有Craft可执行")
-            Map()
+            $('#trustMap').click()
         }
 
     } else {
@@ -159,11 +154,10 @@ function Chest() {
     document.querySelectorAll("._container-igacaa-3")[1].click()
     // 所有宝箱元素
     document.querySelectorAll("._grid_item-y6j7dy-6._grid_item_selectable-y6j7dy-7.pSdbJ.bdKZmt")
-    craftCX()
+
+    $('#trustCraftCX').click()
 }
-var cxmap = null
 // 3.查询地图7层是否有craft的格子,如果有,则移动不在craft的法师
-var mapZXtime = null
 const mapZX = (craftElement, text, id) => {
     return new Promise((resolve, reject) => {
         craftElement.click();
@@ -185,6 +179,7 @@ const mapZX = (craftElement, text, id) => {
 
                         if (text.indexOf(textIndex) > -1) {
                             log("当前法师已经在Craft格子 for")
+                            document.querySelectorAll("._fade-c43pys-3")[0].click()
                             resolve(true)
                         } else {
                             log(`${id}存在Craft格子,${text}准备迁移到${textIndex}`)
@@ -199,8 +194,6 @@ const mapZX = (craftElement, text, id) => {
                                 resolve(false)
                             }
                         }
-                    } else {
-                        // log("此格子不是Craft")
                     }
                 }
                 if (!isState) {
@@ -235,30 +228,29 @@ const Map = async () => {
     }
     let timeEnd = null
     let timeEndOut = null
+    globalNum++;
     timeEnd = setInterval(() => {
         if (document.querySelectorAll(".ctaxMU").length < 1) {
             clearInterval(timeEnd)
             clearTimeout(timeEndOut)
-
             timeEndOut = setTimeout(function () {
-                log("开始进入下一轮...")
-                claim()
-            }, 10000)
+                log(`开始进入第${globalNum}轮...`)
+                if (globalNum > 5) {
+                    location.reload();
+                } else {
+                    $('#trustClaim').click()
+                }
+
+            }, 5000)
         } else {
             log("等待执行完毕后进入下一轮...")
-            MapNum++;
-            if (MapNum > 5) {
-                location.reload();
-            }
         }
-    }, 10000)
-    // lootsFn()
-
+    }, 5000)
 }
 (function () {
     const startTyple = `height:35px;position:fixed;bottom:10%;left:50%;margin-left:-160px;z-index:1000;display:flex;border-radius:5px;overflow:hidden;`;
     const startTypleItem = `font-size:13px;width:80px;background-color:#188eee;display:flex;justify-content:center;align-items:center;color:#fff;font-weight:bolder;`;
-    var toolbarbody = `
+    const toolbarbody = `
     <div style=${startTyple}>
         <div id="trustClaim" style=${startTypleItem}>Claim</div>
         <div id="trustCraftCX"  style=${startTypleItem}>Craft</div>
@@ -283,6 +275,6 @@ const Map = async () => {
     $('#trustMap').bind('click', function () {
         Map()
     })
-    claim()
+    $('#trustClaim').click()
 })()
 
