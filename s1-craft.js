@@ -256,8 +256,8 @@ const Map = async () => {
 
 }
 (function () {
-    const startTyple = `height:50px;position:fixed;bottom:5%;left:10%;z-index:1000;display:flex;`;
-    const startTypleItem = `font-size:13px;width:80px;background-color:#188eee;border-right-width:1px;border-color:#600eee;border-right-style:solid;display:flex;justify-content:center;align-items:center;color:#fff;`;
+    const startTyple = `height:35px;position:fixed;bottom:10%;left:50%;margin-left:-160px;z-index:1000;display:flex;border-radius:5px;overflow:hidden;`;
+    const startTypleItem = `font-size:13px;width:80px;background-color:#188eee;display:flex;justify-content:center;align-items:center;color:#fff;font-weight:bolder;`;
     var toolbarbody = `
     <div style=${startTyple}>
         <div id="trustClaim" style=${startTypleItem}>Claim</div>
@@ -266,6 +266,14 @@ const Map = async () => {
         <div id="trustChest"  style=${startTypleItem}>开宝箱</div>
     </div>`;
     $("body").before(toolbarbody)
+    document.getElementById("trustClaim").style.background = "#8e44ad"
+    document.getElementById("trustClaim").style.color = "#a29bfe"
+    document.getElementById("trustCraftCX").style.background = "#16a085"
+    document.getElementById("trustCraftCX").style.color = "#00b894"
+    document.getElementById("trustMap").style.background = "#d35400"
+    document.getElementById("trustMap").style.color = "#ff7675"
+    document.getElementById("trustChest").style.background = "#f39c12"
+    document.getElementById("trustChest").style.color = "#fdcb6e"
     $('#trustClaim').bind('click', function () {
         claim()
     })
