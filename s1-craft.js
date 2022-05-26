@@ -77,6 +77,7 @@ var time = null;
 var yczx = null;
 // 某个法师执行craft操作 6.自动选入3个装备,仍然惦记Craft 基本完成
 const craftZX = (craftElement) => {
+    let CraftNum = 0;
     return new Promise((resolve, reject) => {
         craftElement.click();
         // 循环执行,直到元素渲染完毕
@@ -97,6 +98,10 @@ const craftZX = (craftElement) => {
                             // resolve(true)
                         } else {
                             log("正在执行Craft")
+                            CraftNum++;
+                            if (CraftNum > 5) {
+                                location.reload();
+                            }
                         }
 
                     }, 2000);
@@ -111,11 +116,6 @@ const craftZX = (craftElement) => {
             }
 
         }, 2000)
-
-
-
-
-
     })
 
 }
@@ -215,7 +215,7 @@ const mapZX = (craftElement, text, id) => {
     })
 }
 const Map = async () => {
-    let MapNum =0
+    let MapNum = 0
     const element = document.querySelectorAll("._queue-w7gpby-2 ._action-kmtnpx-1.bPyphi")
     let elementArr = []
     for (let index = 0; index < element.length; index++) {
@@ -227,8 +227,8 @@ const Map = async () => {
     console.log(elementArr)
     elementArr.length < 1 && log("没有Move可执行")
     for (let index = 0; index < elementArr.length; index++) {
-        const e = document.querySelectorAll("._queue-w7gpby-2 ._queue-kmtnpx-0.kQjnwr")[index].childNodes[0].childNodes[2].innerText
-        const id = document.querySelectorAll("._overlay-k0m5r7-1.fIMthV")[index].innerText.split("\n")[1]
+        const e = elementArr[index].parentNode.parentNode.childNodes[0].childNodes[2].innerText
+        const id = elementArr[index].parentNode.parentNode.parentNode.parentNode.childNodes[0].innerText.split("\n")[1]
         const lastElement = elementArr[index]
         const result = await mapZX(lastElement, e, id)
         console.log(result)
