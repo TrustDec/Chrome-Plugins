@@ -151,6 +151,7 @@ const moveAllToBZX = (moveElement, e, id) => {
 }
 const moveAllToB = async () => {
     let element = [];
+    let moveAllToBNum =0
     const moveArr = document.querySelectorAll("._queue-w7gpby-2 ._action-kmtnpx-1.bPyphi")
     for (let index = 0; index < moveArr.length; index++) {
         let lock = moveArr[index].parentNode.querySelectorAll("._lock-kmtnpx-5")
@@ -183,8 +184,12 @@ const moveAllToB = async () => {
             }, 3000)
         } else {
             log("等待执行完毕后进入下一轮...")
+            moveAllToBNum++;
+            if (moveAllToBNum > 50) {
+                location.reload();
+            }
         }
-    }, 3000)
+    }, 1000)
 }
 
 // 2.查询法师中哪些是Craft 4.按顺序执行所有可Craft的法师 基本完成
