@@ -176,6 +176,7 @@ const mapZX = (craftElement, text, id) => {
             for (let index = 0; index < movesElement.length; index++) {
                 const defaultCraft = movesElement[index]
                 const ycz = defaultCraft.querySelector("._icon-hzg9if-7.kPSOpj") || defaultCraft.querySelector("._icon-hzg9if-7.hbGAsg")
+                console.log(ycz)
                 if (ycz) {
                     isState = true
                     const textIndex = ["A", "B", "C"][index]
