@@ -11,21 +11,38 @@
 
 'use strict';
 function log(str) {
-    console.log("%c[*lada*] " + str + ":", "color: green;font-size:15px");
+    console.log("%c[*lada*] "+ str, "color: green;font-size:15px");
 }
 
 // 1.查询是否需要Claim 基本完成
 function claim() {
-    var buttons = document.querySelectorAll("._claim-kmtnpx-8");
-    if (buttons.length > 0) {
-        log("正在执行" + buttons.length + "个claim" + buttons)
-        for (let index = 0; index < buttons.length; index++) {
-            buttons[index].click();
+    var box = null
+    var boxtime = null
+    box = setInterval(function () {
+        if (document.querySelectorAll("._item-w7gpby-0").length > 0) {
+            clearInterval(box)
+            var buttons = document.querySelectorAll("._claim-kmtnpx-8");
+            if (buttons.length > 0) {
+                for (let index = 0; index < buttons.length; index++) {
+                    buttons[index].click();
+                }
+                boxtime = setInterval(() => {
+                    if (document.querySelectorAll(".ctaxMU").length < 1) {
+                        clearInterval(boxtime)
+                        claim()
+                    } else {
+                        log("正在执行" + buttons.length + "个claim" + buttons)
+                    }
+
+                }, 2000);
+            } else {
+                log("没有claim执行")
+                craftCX()
+            }
         }
-    } else {
-        log("没有claim执行")
-        craftCX()
-    }
+    }, 1000)
+
+  
 }
 
 
@@ -35,13 +52,11 @@ var yczx = null;
 const craftZX = (craftElement) => {
     return new Promise((resolve, reject) => {
         craftElement.click();
-        console.log(craftElement)
         // 循环执行,直到元素渲染完毕
         yczx = setInterval(() => {
             const items = document.querySelectorAll("._item-sc-19b2yt2-0")
             if (items.length) {
                 clearInterval(yczx)
-                console.log(items)
                 if (items.length >= 3) {
                     items[0].click()
                     items[1].click()
@@ -82,7 +97,7 @@ const craftZX = (craftElement) => {
 const craftCX = async () => {
     // 切换到法师
     document.querySelectorAll("._item-k86mvz-1")[3].click()
-   let Crafts = []
+    let Crafts = []
     // craft装备类型,
     const Craftsarray = document.querySelectorAll(".cCcBhM") || []
     //  craft宝箱类型,
@@ -156,7 +171,7 @@ const mapZX = (craftElement, text, id) => {
                         }
                     }
                 } else {
-                    log("此格子不是Craft")
+                    // log("此格子不是Craft")
                 }
             }
             if (!isState) {
@@ -183,10 +198,22 @@ const Map = async () => {
         const result = await mapZX(lastElement, e, id)
         console.log(result)
     }
-    setTimeout(function(){
-        claim()
+    var timeEnd = null
+    var timeEndOut = null
+    timeEnd = setInterval(() => {
+        if (document.querySelectorAll(".ctaxMU").length < 1) {
+            clearInterval(timeEnd)
+            clearTimeout(timeEndOut)
+            timeEndOut = setTimeout(function () {
+                log("开始进入下一轮...")
+                claim()
+            }, 10000)
+        } else {
+            log("等待执行完毕后进入下一轮...")
+        }
     },10000)
-  
+   
+
 }
 (function () {
     const startTyple = `height:50px;position:fixed;bottom:5%;left:10%;z-index:1000;display:flex;`;
@@ -208,14 +235,6 @@ const Map = async () => {
     $('#trustMap').bind('click', function () {
         Map()
     })
-    // 进来之后执行 Craft
-    // craftCX()
-    var box = null
-    box = setInterval(function(){
-        if(document.querySelectorAll("._item-w7gpby-0").length>0){
-            clearInterval(box)
-            claim()
-        }
-    },1000)
+    claim()
 })()
 
