@@ -24,11 +24,11 @@ function claim() {
         }
     } else {
         log("没有claim执行")
-        // Map()
+        craftCX()
     }
 }
 
-var Crafts = [];
+
 var time = null;
 var yczx = null;
 // 某个法师执行craft操作 6.自动选入3个装备,仍然惦记Craft 基本完成
@@ -82,7 +82,7 @@ const craftZX = (craftElement) => {
 const craftCX = async () => {
     // 切换到法师
     document.querySelectorAll("._item-k86mvz-1")[3].click()
-    Crafts = []
+   let Crafts = []
     // craft装备类型,
     const Craftsarray = document.querySelectorAll(".cCcBhM") || []
     //  craft宝箱类型,
@@ -169,7 +169,6 @@ const mapZX = (craftElement, text, id) => {
 }
 const Map = async () => {
     const element = document.querySelectorAll("._queue-w7gpby-2 ._action-kmtnpx-1.bPyphi")
-
     let elementArr = []
     for (let index = 0; index < element.length; index++) {
         let lock = element[index].parentNode.querySelectorAll("._lock-kmtnpx-5")
@@ -177,15 +176,16 @@ const Map = async () => {
             elementArr.push(element[index])
         }
     }
-    console.log(elementArr)
     for (let index = 0; index < elementArr.length; index++) {
         const e = document.querySelectorAll("._queue-w7gpby-2 ._queue-kmtnpx-0.kQjnwr")[index].childNodes[0].childNodes[2].innerText
         const id = document.querySelectorAll("._overlay-k0m5r7-1.fIMthV")[index].innerText.split("\n")[1]
         const lastElement = elementArr[index]
-        console.log(lastElement)
         const result = await mapZX(lastElement, e, id)
         console.log(result)
     }
+    setTimeout(function(){
+        claim()
+    },10000)
   
 }
 (function () {
@@ -195,15 +195,14 @@ const Map = async () => {
     <div style=${startTyple}>
         <div id="trustClaim" style=${startTypleItem}>claim</div>
         <div id="trustCraftCX"  style=${startTypleItem}>可燃烧查询</div>
-        <div id="trustChest"  style=${startTypleItem}>开宝箱</div>
         <div id="trustMap"  style=${startTypleItem}>查询地图</div>
+        <div id="trustChest"  style=${startTypleItem}>开宝箱</div>
     </div>`;
     $("body").before(toolbarbody)
     $('#trustClaim').bind('click', function () {
         claim()
     })
     $('#trustCraftCX').bind('click', function () {
-        Crafts = []
         craftCX()
     })
     $('#trustMap').bind('click', function () {
@@ -211,7 +210,7 @@ const Map = async () => {
     })
     // 进来之后执行 Craft
     // craftCX()
-    const box = null
+    var box = null
     box = setInterval(function(){
         if(document.querySelectorAll("._item-w7gpby-0").length>0){
             clearInterval(box)
