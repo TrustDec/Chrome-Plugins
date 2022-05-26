@@ -8,6 +8,8 @@
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js
 // ==/UserScript==
 // 顺序:claim->craft->move->craft->loot
+//
+
 
 'use strict';
 function log(str) {
@@ -68,21 +70,7 @@ function lootsFn() {
             element[index].click();
         }
     }
-    let timeEnd = null
-    let timeEndOut = null
-    timeEnd = setInterval(() => {
-        if (document.querySelectorAll(".ctaxMU").length < 1) {
-            clearInterval(timeEnd)
-            clearTimeout(timeEndOut)
-
-            timeEndOut = setTimeout(function () {
-                log("开始进入下一轮...")
-                claim()
-            }, 10000)
-        } else {
-            log("等待执行完毕后进入下一轮...")
-        }
-    }, 10000)
+   
 }
 
 var time = null;
@@ -237,7 +225,22 @@ const Map = async () => {
         const result = await mapZX(lastElement, e, id)
         console.log(result)
     }
-    lootsFn()
+    let timeEnd = null
+    let timeEndOut = null
+    timeEnd = setInterval(() => {
+        if (document.querySelectorAll(".ctaxMU").length < 1) {
+            clearInterval(timeEnd)
+            clearTimeout(timeEndOut)
+
+            timeEndOut = setTimeout(function () {
+                log("开始进入下一轮...")
+                claim()
+            }, 10000)
+        } else {
+            log("等待执行完毕后进入下一轮...")
+        }
+    }, 10000)
+    // lootsFn()
 
 }
 (function () {
