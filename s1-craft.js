@@ -7,17 +7,18 @@
 // @match       https://play.laddercaster.com/
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js
 // ==/UserScript==
-// 顺序:claim->craft->move->craft
+// 顺序:claim->craft->move->craft->loot
 
 'use strict';
 function log(str) {
-    console.log("%c[*lada*] "+ str, "color: green;font-size:15px");
+    console.log("%c[*lada*] " + str, "color: green;font-size:15px");
 }
 
 // 1.查询是否需要Claim 基本完成
 function claim() {
     var box = null
     var boxtime = null
+    let claimNum = 0
     box = setInterval(function () {
         if (document.querySelectorAll("._item-w7gpby-0").length > 0) {
             clearInterval(box)
@@ -31,7 +32,11 @@ function claim() {
                         clearInterval(boxtime)
                         claim()
                     } else {
-                        log("正在执行" + buttons.length + "个claim" + buttons)
+                        log("正在执行" + buttons.length + "个claim")
+                        claimNum++;
+                        if (claimNum > 25) {
+                            location.reload();
+                        }
                     }
 
                 }, 2000);
@@ -42,9 +47,43 @@ function claim() {
         }
     }, 1000)
 
-  
-}
 
+}
+function lootsFn() {
+    const gZYwHU = document.querySelectorAll("._action-kmtnpx-1>.gZYwHU")
+    const FPVGs = document.querySelectorAll("._action-kmtnpx-1>.FPVGs")
+    const iRJfGY = document.querySelectorAll("._action-kmtnpx-1>.iRJfGY")
+    const newArr = [...gZYwHU, ...FPVGs, ...iRJfGY];
+    let element = [];
+    for (let i = 0; i < newArr.length; i++) {
+        let lock = newArr[i].parentNode.querySelectorAll("._lock-kmtnpx-5")
+        if (lock.length < 1) {
+            element.push(newArr[i])
+        }
+    }
+    element.length < 1 && log("没有loots可执行")
+    if (element.length > 0) {
+        log(element.length + "个loots开始执行")
+        for (let index = 0; index < element.length; index++) {
+            element[index].click();
+        }
+    }
+    let timeEnd = null
+    let timeEndOut = null
+    timeEnd = setInterval(() => {
+        if (document.querySelectorAll(".ctaxMU").length < 1) {
+            clearInterval(timeEnd)
+            clearTimeout(timeEndOut)
+
+            timeEndOut = setTimeout(function () {
+                log("开始进入下一轮...")
+                claim()
+            }, 10000)
+        } else {
+            log("等待执行完毕后进入下一轮...")
+        }
+    }, 10000)
+}
 
 var time = null;
 var yczx = null;
@@ -110,13 +149,12 @@ const craftCX = async () => {
                 Crafts.push(newCaftBoxArr[index])
             }
         }
-        log(Crafts)
         if (Crafts.length) {
             log(Crafts.length + "个符合Craft")
             const result = await craftZX(Crafts[0])
             result && craftCX() || Chest()
         } else {
-            log("没有符合的Craft")
+            log("没有Craft可执行")
             Map()
         }
 
@@ -175,7 +213,7 @@ const mapZX = (craftElement, text, id) => {
                 }
             }
             if (!isState) {
-                log("当前法师不存在可Craft的格子")
+                log("当前法师不存在Craft的格子")
                 document.querySelectorAll("._fade-c43pys-3")[0].click()
                 resolve(false)
             }
@@ -191,6 +229,7 @@ const Map = async () => {
             elementArr.push(element[index])
         }
     }
+    elementArr.length < 1 && log("没有Move可执行")
     for (let index = 0; index < elementArr.length; index++) {
         const e = document.querySelectorAll("._queue-w7gpby-2 ._queue-kmtnpx-0.kQjnwr")[index].childNodes[0].childNodes[2].innerText
         const id = document.querySelectorAll("._overlay-k0m5r7-1.fIMthV")[index].innerText.split("\n")[1]
@@ -198,21 +237,7 @@ const Map = async () => {
         const result = await mapZX(lastElement, e, id)
         console.log(result)
     }
-    var timeEnd = null
-    var timeEndOut = null
-    timeEnd = setInterval(() => {
-        if (document.querySelectorAll(".ctaxMU").length < 1) {
-            clearInterval(timeEnd)
-            clearTimeout(timeEndOut)
-            timeEndOut = setTimeout(function () {
-                log("开始进入下一轮...")
-                claim()
-            }, 10000)
-        } else {
-            log("等待执行完毕后进入下一轮...")
-        }
-    },10000)
-   
+    lootsFn()
 
 }
 (function () {
@@ -220,9 +245,9 @@ const Map = async () => {
     const startTypleItem = `font-size:13px;width:80px;background-color:#188eee;border-right-width:1px;border-color:#600eee;border-right-style:solid;display:flex;justify-content:center;align-items:center;color:#fff;`;
     var toolbarbody = `
     <div style=${startTyple}>
-        <div id="trustClaim" style=${startTypleItem}>claim</div>
-        <div id="trustCraftCX"  style=${startTypleItem}>可燃烧查询</div>
-        <div id="trustMap"  style=${startTypleItem}>查询地图</div>
+        <div id="trustClaim" style=${startTypleItem}>Claim</div>
+        <div id="trustCraftCX"  style=${startTypleItem}>Craft</div>
+        <div id="trustMap"  style=${startTypleItem}>Move</div>
         <div id="trustChest"  style=${startTypleItem}>开宝箱</div>
     </div>`;
     $("body").before(toolbarbody)
