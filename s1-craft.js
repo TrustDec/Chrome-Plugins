@@ -32,11 +32,12 @@ function claim() {
                         clearInterval(boxtime)
                         $('#trustClaim').click()
                     } else {
-                        log("正在执行" + buttons.length + "个claim")
                         claimNum++;
                         if (claimNum > 25) {
                             location.reload();
                         }
+                        log("正在执行" + buttons.length + "个claim:" + claimNum)
+
                     }
 
                 }, 1000);
@@ -68,31 +69,7 @@ function lootsFn() {
             element[index].click();
         }
     }
-    let timeEnd = null
-    let timeEndOut = null
-    let moveAllToBNum = 0
-    globalNum++;
-    timeEnd = setInterval(() => {
-        if (document.querySelectorAll(".ctaxMU").length < 1) {
-            clearInterval(timeEnd)
-            clearTimeout(timeEndOut)
-            timeEndOut = setTimeout(function () {
-                log(`开始进入第${globalNum}轮...`)
-                if (globalNum > 5) {
-                    location.reload();
-                } else {
-                    $('#trustClaim').click()
-                }
 
-            }, 3000)
-        } else {
-            log("等待执行完毕后进入下一轮...")
-            moveAllToBNum++;
-            if (moveAllToBNum > 50) {
-                location.reload();
-            }
-        }
-    }, 1000)
 
 }
 
@@ -265,7 +242,6 @@ const mapZX = (craftElement, text, id) => {
     return new Promise((resolve, reject) => {
         craftElement.click();
         // 点击之后查询当前在哪个格子,查询Craft格子在哪里
-        //
         log(`id:${id} ${text} 开始检测...`)
         let mapTime = null
         mapTime = setInterval(function () {
@@ -273,21 +249,23 @@ const mapZX = (craftElement, text, id) => {
             const movesElement = document.querySelectorAll("._row-sc-1xdwm08-2.gQEDwo")[1].querySelector("._tiles-sc-1zb5eq-0.jxlyiU").childNodes;
             if (movesElement.length > 0) {
                 clearInterval(mapTime)
-                for (let index = 0; index < movesElement.length; index++) {
-                    const defaultCraft = movesElement[index]
-                    const ycz = defaultCraft.querySelector("._icon-hzg9if-7.kPSOpj") || defaultCraft.querySelector("._icon-hzg9if-7.hbGAsg")
-                    if (ycz) {
-                        isState = true
-                        const textIndex = ["A", "B", "C"][index]
+                const currentIndex = ["A","B","C"].indexOf("B8".split("")[0])
 
-                        if (text.indexOf(textIndex) > -1) {
-                            log("当前法师已经在Craft格子 for")
+                if( movesElement[currentIndex].querySelector("._icon-hzg9if-7.kPSOpj")){
+                     log("当前法师已经在Craft格子 for")
                             document.querySelectorAll("._fade-c43pys-3")[0].click()
+                      isState = true
                             resolve(true)
-                        } else {
-                            log(`${id}存在Craft格子,${text}准备迁移到${textIndex}`)
-                            ycz.parentNode.parentNode.click()
-                            if (document.querySelector("._button-t7f8y3-3.gHfmBw")) {
+                }
+                for (let index = 0; index < movesElement.length; index++) {
+                    const ycz = movesElement[index].querySelector("._icon-hzg9if-7.hbGAsg");
+                    const textIndex = ["A", "B", "C"][index]
+
+                    if (ycz) {
+                          isState = true
+                         log(`${id}存在Craft格子,${text}准备迁移到${textIndex}`)
+                         ycz.parentNode.parentNode.click()
+                        if (document.querySelector("._button-t7f8y3-3.gHfmBw")) {
                                 log("正在Move")
                                 document.querySelector("._button-t7f8y3-3.gHfmBw").click()
                                 resolve(true)
@@ -296,7 +274,6 @@ const mapZX = (craftElement, text, id) => {
                                 document.querySelectorAll("._fade-c43pys-3")[0].click()
                                 resolve(false)
                             }
-                        }
                     }
                 }
                 if (!isState) {
@@ -310,28 +287,46 @@ const mapZX = (craftElement, text, id) => {
         }, 2000)
     })
 }
+
 const Map = async () => {
-    let MapNum = 0
     const element = document.querySelectorAll("._queue-w7gpby-2 ._action-kmtnpx-1.bPyphi")
-    let elementArr = []
     for (let index = 0; index < element.length; index++) {
         let lock = element[index].parentNode.querySelectorAll("._lock-kmtnpx-5")
-        if (element[index].innerText === "Move" && lock.length < 1) {
-            elementArr.push(element[index])
+        if (element[index].innerText === "Move") {
+            if (lock.length < 1) {
+                let e = element[index].parentNode.parentNode.childNodes[0].childNodes[2].innerText
+                let idtemp = element[index].parentNode.parentNode.parentNode.parentNode.childNodes[0].innerText.split("\n")[1]
+                const result = await mapZX(element[index], e, idtemp)
+                console.log(result)
+            }
         }
     }
-    console.log(elementArr)
-    elementArr.length < 1 && log("没有Move可执行")
-    for (let index = 0; index < elementArr.length; index++) {
-        const e = elementArr[index].parentNode.parentNode.childNodes[0].childNodes[2].innerText
-        const id = elementArr[index].parentNode.parentNode.parentNode.parentNode.childNodes[0].innerText.split("\n")[1]
-        const lastElement = elementArr[index]
-        const result = await mapZX(lastElement, e, id)
-        console.log(result)
-    }
-    // moveAllToB();
-    lootsFn()
+    globalNum >= 4 && lootsFn()
 
+    let timeEnd = null
+    let timeEndOut = null
+    let moveAllToBNum = 0
+    globalNum++;
+    timeEnd = setInterval(() => {
+        if (document.querySelectorAll(".ctaxMU").length < 1) {
+            clearInterval(timeEnd)
+            clearTimeout(timeEndOut)
+            timeEndOut = setTimeout(function () {
+                log(`开始进入第${globalNum}轮...`)
+                if (globalNum > 6) {
+                    location.reload();
+                }
+                $('#trustClaim').click()
+
+            }, 3000)
+        } else {
+            log("等待执行完毕后进入下一轮...")
+            moveAllToBNum++;
+            if (moveAllToBNum > 50) {
+                location.reload();
+            }
+        }
+    }, 1000)
 
 }
 (function () {
@@ -343,6 +338,7 @@ const Map = async () => {
         <div id="trustCraftCX"  style=${startTypleItem}>Craft</div>
         <div id="trustMap"  style=${startTypleItem}>Move</div>
         <div id="trustChest"  style=${startTypleItem}>开宝箱</div>
+
     </div>`;
     $("body").before(toolbarbody)
     document.getElementById("trustClaim").style.background = "#8e44ad"
