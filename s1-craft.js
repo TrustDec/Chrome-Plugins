@@ -249,31 +249,31 @@ const mapZX = (craftElement, text, id) => {
             const movesElement = document.querySelectorAll("._row-sc-1xdwm08-2.gQEDwo")[1].querySelector("._tiles-sc-1zb5eq-0.jxlyiU").childNodes;
             if (movesElement.length > 0) {
                 clearInterval(mapTime)
-                const currentIndex = ["A","B","C"].indexOf("B8".split("")[0])
+                const currentIndex = ["A", "B", "C"].indexOf("B8".split("")[0])
 
-                if( movesElement[currentIndex].querySelector("._icon-hzg9if-7.kPSOpj")){
-                     log("当前法师已经在Craft格子 for")
-                            document.querySelectorAll("._fade-c43pys-3")[0].click()
-                      isState = true
-                            resolve(true)
+                if (movesElement[currentIndex].querySelector("._icon-hzg9if-7.kPSOpj")) {
+                    log("当前法师已经在Craft格子 for")
+                    document.querySelectorAll("._fade-c43pys-3")[0].click()
+                    isState = true
+                    resolve(true)
                 }
                 for (let index = 0; index < movesElement.length; index++) {
                     const ycz = movesElement[index].querySelector("._icon-hzg9if-7.hbGAsg");
                     const textIndex = ["A", "B", "C"][index]
 
                     if (ycz) {
-                          isState = true
-                         log(`${id}存在Craft格子,${text}准备迁移到${textIndex}`)
-                         ycz.parentNode.parentNode.click()
+                        isState = true
+                        log(`${id}存在Craft格子,${text}准备迁移到${textIndex}`)
+                        ycz.parentNode.parentNode.click()
                         if (document.querySelector("._button-t7f8y3-3.gHfmBw")) {
-                                log("正在Move")
-                                document.querySelector("._button-t7f8y3-3.gHfmBw").click()
-                                resolve(true)
-                            } else {
-                                log("距离太远 无法Move")
-                                document.querySelectorAll("._fade-c43pys-3")[0].click()
-                                resolve(false)
-                            }
+                            log("正在Move")
+                            document.querySelector("._button-t7f8y3-3.gHfmBw").click()
+                            resolve(true)
+                        } else {
+                            log("距离太远 无法Move")
+                            document.querySelectorAll("._fade-c43pys-3")[0].click()
+                            resolve(false)
+                        }
                     }
                 }
                 if (!isState) {
