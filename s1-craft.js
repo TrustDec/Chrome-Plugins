@@ -260,7 +260,9 @@ const mapZX = (craftElement, text, id) => {
                 for (let index = 0; index < movesElement.length; index++) {
                     const ycz = movesElement[index].querySelector("._icon-hzg9if-7.hbGAsg");
                     const textIndex = ["A", "B", "C"][index]
-
+                    if (currentIndex == index) {
+                        continue
+                    }
                     if (ycz) {
                         isState = true
                         log(`${id}存在Craft格子,${text}准备迁移到${textIndex}`)
