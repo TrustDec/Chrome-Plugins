@@ -8,6 +8,7 @@
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js
 // ==/UserScript==
 // 顺序:claim->craft->move->craft->把处于A、C位置的move到 B
+// 顺序:claim->craft->move->craft->lootsFn
 'use strict';
 function log(str) {
     console.log("%c[*lada*] " + str, "color: green;font-size:15px");
@@ -67,6 +68,31 @@ function lootsFn() {
             element[index].click();
         }
     }
+    let timeEnd = null
+    let timeEndOut = null
+    let moveAllToBNum = 0
+    globalNum++;
+    timeEnd = setInterval(() => {
+        if (document.querySelectorAll(".ctaxMU").length < 1) {
+            clearInterval(timeEnd)
+            clearTimeout(timeEndOut)
+            timeEndOut = setTimeout(function () {
+                log(`开始进入第${globalNum}轮...`)
+                if (globalNum > 5) {
+                    location.reload();
+                } else {
+                    $('#trustClaim').click()
+                }
+
+            }, 3000)
+        } else {
+            log("等待执行完毕后进入下一轮...")
+            moveAllToBNum++;
+            if (moveAllToBNum > 50) {
+                location.reload();
+            }
+        }
+    }, 1000)
 
 }
 
@@ -304,31 +330,8 @@ const Map = async () => {
         console.log(result)
     }
     // moveAllToB();
-    let timeEnd = null
-    let timeEndOut = null
-    let moveAllToBNum =0
-    globalNum++;
-    timeEnd = setInterval(() => {
-        if (document.querySelectorAll(".ctaxMU").length < 1) {
-            clearInterval(timeEnd)
-            clearTimeout(timeEndOut)
-            timeEndOut = setTimeout(function () {
-                log(`开始进入第${globalNum}轮...`)
-                if (globalNum > 5) {
-                    location.reload();
-                } else {
-                    $('#trustClaim').click()
-                }
+    lootsFn()
 
-            }, 3000)
-        } else {
-            log("等待执行完毕后进入下一轮...")
-            moveAllToBNum++;
-            if (moveAllToBNum > 50) {
-                location.reload();
-            }
-        }
-    }, 1000)
 
 }
 (function () {
