@@ -240,56 +240,59 @@ function Chest() {
 // 3.查询地图7层是否有craft的格子,如果有,则移动不在craft的法师
 const mapZX = (craftElement, text, id) => {
     return new Promise((resolve, reject) => {
-        craftElement.click();
-        // 点击之后查询当前在哪个格子,查询Craft格子在哪里
-        log(`id:${id} ${text} 开始检测...`)
-        let mapTime = null
-        mapTime = setInterval(function () {
-            let isState = false
-            const movesElement = document.querySelectorAll("._row-sc-1xdwm08-2.gQEDwo")[1].querySelector("._tiles-sc-1zb5eq-0.jxlyiU").childNodes;
-            if (movesElement.length > 0) {
-                clearInterval(mapTime)
-                const currentIndex = ["A", "B", "C"].indexOf("B8".split("")[0])
-
-                if (movesElement[currentIndex].querySelector("._icon-hzg9if-7.kPSOpj")) {
-                    log("当前法师已经在Craft格子 for")
-                    document.querySelectorAll("._fade-c43pys-3")[0].click()
-                    isState = true
-                    resolve(true)
-                }
-                for (let index = 0; index < movesElement.length; index++) {
-                    const ycz = movesElement[index].querySelector("._icon-hzg9if-7.hbGAsg");
-                    const textIndex = ["A", "B", "C"][index]
-                    if (currentIndex == index) {
-                        continue
-                    }
-                    if (ycz) {
+        setTimeout(function () {
+            craftElement.click();
+            // 点击之后查询当前在哪个格子,查询Craft格子在哪里
+            log(`id:${id} ${text} 开始检测...`)
+            let mapTime = null
+            mapTime = setInterval(function () {
+                let isState = false
+                const movesElement = document.querySelectorAll("._row-sc-1xdwm08-2.gQEDwo")[1].querySelector("._tiles-sc-1zb5eq-0.jxlyiU").childNodes;
+                if (movesElement.length > 0) {
+                    clearInterval(mapTime)
+                    const currentIndex = ["A", "B", "C"].indexOf(text.split("")[0])
+                    if (movesElement[currentIndex].querySelector("._icon-hzg9if-7.kPSOpj")) {
+                        log("当前法师已经在Craft格子 for")
+                        document.querySelectorAll("._fade-c43pys-3")[0].click()
                         isState = true
-                        log(`${id}存在Craft格子,${text}准备迁移到${textIndex}`)
-                        ycz.parentNode.parentNode.click()
-                        if (document.querySelector("._button-t7f8y3-3.gHfmBw")) {
-                            log("正在Move")
-                            document.querySelector("._button-t7f8y3-3.gHfmBw").click()
-                            resolve(true)
-                        } else {
-                            log("距离太远 无法Move")
-                            document.querySelectorAll("._fade-c43pys-3")[0].click()
-                            resolve(false)
+                        resolve(true)
+                    }
+                    for (let index = 0; index < movesElement.length; index++) {
+                        const textIndex = ["A", "B", "C"][index]
+                        if (currentIndex == index) {
+                            continue
+                        }
+                        const ycz = movesElement[index].querySelector("._icon-hzg9if-7.kPSOpj") || movesElement[index].querySelector("._icon-hzg9if-7.hbGAsg")
+                        if (ycz) {
+                            isState = true
+                            log(`${id}存在Craft格子,${text}准备迁移到${textIndex}`)
+                            ycz.parentNode.click()
+                            if (document.querySelector("._button-t7f8y3-3.gHfmBw")) {
+                                log("正在Move")
+                                document.querySelector("._button-t7f8y3-3.gHfmBw").click()
+                                resolve(true)
+                            } else {
+                                log("距离太远 无法Move")
+                                document.querySelectorAll("._fade-c43pys-3")[0].click()
+                                resolve(true)
+                            }
+                            break
                         }
                     }
+
+                    if (!isState) {
+                        log("当前法师不存在Craft的格子")
+                        document.querySelectorAll("._fade-c43pys-3")[0].click()
+                        resolve(false)
+                    }
+                } else {
+                    log("等待格子数据加载...")
                 }
-                if (!isState) {
-                    log("当前法师不存在Craft的格子")
-                    document.querySelectorAll("._fade-c43pys-3")[0].click()
-                    resolve(false)
-                }
-            } else {
-                log("等待格子数据加载...")
-            }
-        }, 2000)
+            }, 2000)
+        }, 500)
+
     })
 }
-
 const Map = async () => {
     const element = document.querySelectorAll("._queue-w7gpby-2 ._action-kmtnpx-1.bPyphi")
     for (let index = 0; index < element.length; index++) {
@@ -298,8 +301,7 @@ const Map = async () => {
             if (lock.length < 1) {
                 let e = element[index].parentNode.parentNode.childNodes[0].childNodes[2].innerText
                 let idtemp = element[index].parentNode.parentNode.parentNode.parentNode.childNodes[0].innerText.split("\n")[1]
-                const result = await mapZX(element[index], e, idtemp)
-                console.log(result)
+                await mapZX(element[index], e, idtemp)
             }
         }
     }
