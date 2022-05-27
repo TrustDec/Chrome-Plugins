@@ -251,7 +251,7 @@ const mapZX = (craftElement, text, id) => {
                 if (movesElement.length > 0) {
                     clearInterval(mapTime)
                     const currentIndex = ["A", "B", "C"].indexOf(text.split("")[0])
-                    if (movesElement[currentIndex].querySelector("._icon-hzg9if-7.kPSOpj")) {
+                    if (movesElement[currentIndex].querySelector("._icon-hzg9if-7.kPSOpj") || movesElement[currentIndex].querySelector("._icon-hzg9if-7.iExdcW")) {
                         log("当前法师已经在Craft格子 for")
                         document.querySelectorAll("._fade-c43pys-3")[0].click()
                         isState = true
@@ -262,7 +262,7 @@ const mapZX = (craftElement, text, id) => {
                         if (currentIndex == index) {
                             continue
                         }
-                        const ycz = movesElement[index].querySelector("._icon-hzg9if-7.kPSOpj") || movesElement[index].querySelector("._icon-hzg9if-7.hbGAsg")
+                        const ycz = movesElement[index].querySelector("._icon-hzg9if-7.kPSOpj") || movesElement[index].querySelector("._icon-hzg9if-7.hbGAsg") || movesElement[index].querySelector("._icon-hzg9if-7.iExdcW")
                         if (ycz) {
                             isState = true
                             log(`${id}存在Craft格子,${text}准备迁移到${textIndex}`)
@@ -289,15 +289,15 @@ const mapZX = (craftElement, text, id) => {
                     log("等待格子数据加载...")
                 }
             }, 2000)
-        }, 500)
+        }, 1000)
 
     })
 }
 const Map = async () => {
     const element = document.querySelectorAll("._queue-w7gpby-2 ._action-kmtnpx-1.bPyphi")
     for (let index = 0; index < element.length; index++) {
-        let lock = element[index].parentNode.querySelectorAll("._lock-kmtnpx-5")
         if (element[index].innerText === "Move") {
+            let lock = element[index].querySelectorAll("._lock-kmtnpx-5")
             if (lock.length < 1) {
                 let e = element[index].parentNode.parentNode.childNodes[0].childNodes[2].innerText
                 let idtemp = element[index].parentNode.parentNode.parentNode.parentNode.childNodes[0].innerText.split("\n")[1]
